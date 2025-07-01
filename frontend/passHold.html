@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale">
+        <title>PassKeep</title>
+
+        <!-- Add icon library -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+        <!--CDN link for including crypto-js-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+        <script>
+            if (typeof CryptoJS === 'undefined') {
+                alert('CryptoJS failed to load!');
+            }
+        </script>
+
+        <!--styling page-->
+        <style>
+            
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                margin: 50px;
+                background-color: #a38db4;
+                color: black;
+            }
+
+            h1 {
+                color: #000000;
+            }
+            h3 {
+                margin-bottom: 20px;
+            }
+            #dataTable {
+                border-bottom: collapse;
+                width: 70%;
+                margin: 20px auto;
+            }
+            #dataTable th,
+            td {
+                padding: 10px;
+                border: 1px solid #ddd;
+                text-align: left;
+            }
+            #dataTable th {
+                background-color: #7c76b0;
+                color: white;
+            }
+            #dataTable tr {
+                background-color: #f7f7f7;
+                color: white;
+            }
+            #myInput {
+                padding: 8px;
+                width: 80%;
+                box-sizing: border-box;
+            }
+
+            .normal-button
+            {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                background-color:#7c76b0;
+                color:white;
+                border-radius:100px;
+                width: 200px;
+                height: 50px;
+                font-size: 15px;
+            }
+
+            .small-btn
+            {
+                background-color: #7c76b0;
+                color: white;
+                border: none;
+                padding: 12px 16px;
+                font-size: 16px;
+                cursor: pointer;
+
+            }
+
+            .togglePassword {
+                width: 20px;
+                height: 12px;
+                cursor: pointer;
+                margin-left: -30px;
+                margin-top: 2px;
+                position: relative;
+                z-index: 2;
+                color: #000000;/*Change to any color*/
+           }
+
+           .tooltip {
+            position: relative;
+            display: inline-block;
+
+           }
+
+        </style>
+    </head>
+    
+    <body>
+        <h1>PassKeep</h1>
+
+        <!-- button to go back to home-->
+        <a href="index.html" target="blank">
+            <button class="normal-button">go back to home</button>
+        </a>
+        <h2>This is where passwords are held</h2>
+        
+        <!--search-->
+        <input type="text" id="myInput" onkeyup="tableSearch()" placeholder="Search for websites.." title="Type in a website">
+
+        <!--looading message-->
+        <p id="loadingMessage" style="font-style: italic;">Loading saved entries...</p>
+        <!--basis for table-->
+        <table id="dataTable"> 
+            <tr>
+                <th>User</th>
+                <th>Pass</th>
+                <th>Site</th>
+                <th style= "width: 25%"> Action </th>
+
+            </tr>
+          
+        </table>
+
+        <!--buttons for saving and adding-->
+        <button class="small-btn" onclick="createFunction()">+</button>
+        <!-- <button class="small-btn" onclick="saveTable()">save data</button> -->
+
+
+
+        <script>
+                
+        let deletedIds = [];
+        //Creates a global list to track which saved rows were deleted.
+        //Allows the saveTable() function to tell the backend which rows to remove from MongoDB.
+
+        let lastEditedRow = null;
+
+
+        //function for creating table row
+        function createFunction() {
+            var table = document.getElementById("dataTable");
+            var row = table.insertRow(-1);
+            row.draggable = true;
+
+            //Add drag event listeners
+            row.addEventListener("dragstart", handleDragStart);
+            row.addEventListener("dragover", handleDragOver);
+            row.addEventListener("drop", handleDrop);
+
+            var cell1 = row.insertCell(-1);
+            var cell2 = row.insertCell(-1);
+            var cell3 = row.insertCell(-1);
+            var cell4 = row.insertCell(-1);
+            var dragCell = row.insertCell(-1);
+        
+            cell1.innerHTML = '<input type="text" placeholder="Enter username" readonly>';
+            cell2.innerHTML = '<input type="password" class="passwordField" placeholder="Enter password" readonly> <i class="fa fa-eye togglePassword" style="color: purple"></i>';
+            cell3.innerHTML = '<input type="text" placeholder="Enter website" readonly>';
+            cell4.innerHTML = `<button title="Delete" class="small-btn del-btn" style='margin-right:20px' readonly> <i class="fa fa-trash"></i> </button>
+                                <button title="Edit" class="small-btn" style='margin-right:20px' onclick="enableEdit(this)"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+                                <button title="Save" class="small-btn" onclick="saveRow(this)"><i class="fa fa-save"></i></button>
+`;
+            
+            dragCell.classList.add("drag-handle");
+            dragCell.innerHTML = `<i class="fa fa-bars" style="cursor: move; color: gray;"></i>`;
+              
+
+        
+        /*    // Attach change listeners for updateRow()
+            [cell1, cell2, cell3].forEach(cell => {
+                cell.querySelector('input').addEventListener('change', () => updateRow(row));
+            });*/
+        }
+
+        //function for deleting SELECT table row
+       function deleteRow(button) {
+
+           const row = button.closest("tr");
+           const id = row.dataset.id;
+
+           /*if (!confirm("Are you sure want to delete this row?")) {
+                return; //User canceled
+           }
+
+
+            if (!id) {
+                console.warn("No ID found. This row may not be savd yet");
+                row.remove(); //Just remove from UI
+                return;
+              }  
+                */
+                              
+            //Send DELETE request to backend
+              fetch(`http://localhost:3000/delete-password/${id}`, {
+                method: 'DELETE',
+               })
+
+               .then(res => res.json())
+               .then(data => {
+                console.log("Deleted from DB:", data);
+                row.remove(); //Remove from UI after confirmation from DB
+               })
+
+               .catch(err => {
+                    console.error("Failed to delete:", err);
+                    alert("Error deleting the password from the database.");
+               });
+
+       } 
+
+
+       /* //This sends a PUT request to update the corresponding MongoDB entry:
+        function updateRow(row) {
+
+            const id = row.dataset.id;
+            if (!id) return;
+
+            const user = row.cells[0].querySelector('input').value;
+            const passRaw = row.cells[1].querySelector('input').value;
+            const site = row.cells[2].querySelector('input').value;
+            const pass = CryptoJS.AES.encrypt(passRaw, 'secretKey').toString();
+
+            
+            fetch(`http://localhost:3000/update-password/${id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json' },
+                body: JSON.stringify({ user, pass, site })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("Updated:", data);
+
+                // Save this row after successful update 
+                //saveRow(row); 
+
+                //relock inputs after update
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach(input => input.setAttribute('readonly', true));
+
+            })
+            .catch(err => {
+                console.error("Update failed:", err);
+            });
+        }
+            */
+
+    function saveRow(button) {
+    const row = button.closest("tr");
+    if (!row) {
+        console.warn("No row found for Save button");
+        return;
+    }
+
+    const username = localStorage.getItem("loggedInUsername") || prompt("Enter your username");
+
+    // Correct children access
+    const userInput = row.cells[0].querySelector("input");
+    const passInput = row.cells[1].querySelector("input");
+    const siteInput = row.cells[2].querySelector("input");
+
+    if (!userInput || !passInput || !siteInput) return;
+
+    const user = userInput.value;
+    const passRaw = passInput.value;
+    const site = siteInput.value;
+
+    if (user === "" && passRaw === "" && site === "") return;
+
+    const pass = CryptoJS.AES.encrypt(passRaw, 'secretKey').toString();
+
+    const entry = {
+        user,
+        pass,
+        site,
+        _id: row.dataset.id || undefined // ← So backend knows if this is new or existing
+    };
+
+   fetch("http://localhost:3000/save-passwords", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        username,
+        entries: [entry] // ← Only the current row!
+    })
+})
+.then(async response => {
+    const result = await response.json();
+
+    if (!response.ok) {
+        // Show server-side error message if available
+        throw new Error(result.message || `Server error ${response.status}`);
+    }
+
+    const savedEntry = result.savedEntries?.[0];
+    if (savedEntry && savedEntry._id) {
+        row.dataset.id = savedEntry._id; // ✅ Save MongoDB _id for future updates
+    }
+
+    alert(result.message || "Row saved!");
+})
+.catch(error => {
+    console.error("Failed to save row:", error);
+    alert("Failed to save this row. " + error.message);
+});
+
+}
+
+
+        //function for retaining info after refreshing
+        window.onload = function () {
+            const username = localStorage.getItem("loggedInUsername") || prompt("Enter your username");
+            if (!username) return;
+        
+            fetch(`http://localhost:3000/get-passwords/${username}`)
+                .then(res => res.json())
+                .then(savedData => {
+                    const table = document.getElementById("dataTable");
+        
+                    // Clear all rows except header (index 0)
+                    while (table.rows.length > 1) {
+                        table.deleteRow(1);
+            }
+
+            // Rebuild rows from saved data
+            savedData.forEach(entry => {
+                const row = table.insertRow(-1);
+                row.dataset.id = entry._id; //Store MongoDB document ID'
+                row.dataset.id = entry._id;
+
+                row.draggable = true;
+
+                row.addEventListener("dragstart", handleDragStart);
+                row.addEventListener("dragover", handleDragOver);
+                row.addEventListener("drop", handleDrop);
+
+                console.log("Row ID set to:", entry._id)
+                const cell1 = row.insertCell(-1);
+                const cell2 = row.insertCell(-1);
+                const cell3 = row.insertCell(-1);
+                const cell4 = row.insertCell(-1);
+                const dragCell = row.insertCell(-1);
+
+                row.addEventListener("dragstart", handleDragStart);
+                row.addEventListener("dragover", handleDragOver);
+                row.addEventListener("drop", handleDrop);
+
+
+                const decryptedPass = decryptPassword(entry.pass);
+
+                cell1.innerHTML = `<input type="text" value="${entry.user}" placeholder="Enter username" readonly>`;
+                cell2.innerHTML = `<input type="password" class="passwordField" value="${decryptedPass}" placeholder="Enter password" readonly> <i class="fa fa-eye togglePassword" style="color: purple"></i>`;
+                cell3.innerHTML = `<input type="text" value="${entry.site}" placeholder="Enter website" readonly>`;
+                cell4.innerHTML = `<button title="Delete" class="small-btn del-btn" style='margin-right:20px'> <i class="fa fa-trash"></i> </button>
+                                    <button title="Edit" class="small-btn" style='margin-right:20px' onclick="enableEdit(this)"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+                                    <button title="Save" class="small-btn" onclick="saveRow(this)"> <i class="fa fa-save"></i> </button>
+                                    `;
+
+                dragCell.classList.add("drag-handle");
+                dragCell.innerHTML = `<i class="fa fa-bars" style="cursor: move; color: gray;"></i>`;
+                
+
+            /*    //add change listeners to send updates
+                [cell1, cell2, cell3].forEach(cell => {
+                    cell.querySelector('input').addEventListener('change', () => updateRow(row));
+                }); */
+            });
+            document.getElementById("loadingMessage").style.display = "none";
+
+        })
+        .catch(err => {
+            console.error('Error loading saved data:', err);
+            document.getElementById("loadingMessage").style.display = "none";
+        });
+}
+
+        //Allows rows to be draggable 
+
+        let draggedRow = null;
+        
+        function handleDragStart(e) {
+            draggedRow = this;
+            e.dataTransfer.effectAllowed = "move";
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault(); // Required to allow drop
+            const target = this;
+        
+            if (target && target !== draggedRow && target.nodeName === "TR") {
+                target.style.borderTop = "2px solid purple";
+            }
+        }
+        
+function handleDrop(e) {
+    e.preventDefault();
+    const target = this;
+
+    if (target && target !== draggedRow && target.nodeName === "TR") {
+        target.style.borderTop = "";
+
+        const table = document.getElementById("dataTable");
+        const draggedIndex = [...table.rows].indexOf(draggedRow);
+        const targetIndex = [...table.rows].indexOf(target);
+
+        if (draggedIndex < targetIndex) {
+            target.after(draggedRow);
+        } else {
+            target.before(draggedRow);
+        }
+
+        // Get new order
+        const rows = Array.from(document.querySelectorAll("#dataTable tr")).slice(1);
+        const newOrder = rows.map((row, index) => ({
+            id: row.dataset.id,
+            order: index
+        }));
+
+        console.log("Sending new order:", newOrder); // 🔍 DEBUG HERE
+
+        fetch("http://localhost:3000/update-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderData: newOrder })
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log("Order updated:", data);
+        })
+        .catch(err => {
+            console.error("Failed to update order:", err);
+        });
+    }
+}
+
+
+        //searches table for WEBSITE name
+        function tableSearch() {
+        var input, filter, table, tr, td, i, txtValue;
+
+        input = document.getElementById("myInput"); // Get the input element by its ID
+        filter = input.value.toUpperCase(); // Convert the input value to uppercase for case-insensitive comparison
+        table = document.getElementById("dataTable"); // Get the table element by its ID
+        tr = table.getElementsByTagName("tr"); // Get all the rows in the table
+
+        for (i = 0; i < tr.length; i++) { // Loop through each row
+              td = tr[i].getElementsByTagName("td")[2]; // Get the first cell in the row
+              if (td) { // If the cell exists
+                let inputBox = td.querySelector("input");//get input inside td
+                txtValue = inputBox ? inputBox.value : "";//get value from input
+                  if (txtValue.toUpperCase().indexOf(filter) > -1) { // Check if the cell text includes the filter text
+                      tr[i].style.display = ""; // Show the row if it matches
+                  } else {
+                      tr[i].style.display = "none"; // Hide the row if it doesn't match
+                  }
+              }
+           }
+        }
+
+        function decryptPassword(encryptedPassword) {
+            try {
+                // Decrypt the encrypted password using the same 'secretKey' as the encryption key
+                const bytes = CryptoJS.AES.decrypt(encryptedPassword, 'secretKey');
+                
+                // Convert the decrypted bytes into a UTF-8 string to retrieve the original password
+                const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
+        
+                // If decryption results in an empty value, throw an error
+                if (!decryptedPassword) throw new Error("Empty result");
+        
+                // Return the decrypted password if successful
+                return decryptedPassword;
+            } catch (e) {
+                // Log a warning if decryption fails and return the original encrypted value as a fallback
+                console.warn("Decryption failed, returning encrypted value:", encryptedPassword);
+                return encryptedPassword; // Fallback: return the encrypted password if decryption fails
+            }
+        }
+
+       // Attach toggle functionality to all eye icons on the page
+      document.addEventListener('click', function (e) {
+    
+    // Check if the clicked element exists AND has the 'togglePassword' class (i.e., is an eye icon)
+    if (e.target && e.target.classList.contains('togglePassword')) {
+        const passwordInput = e.target.previousElementSibling;
+
+        //Toggle input type
+        const isHidden = passwordInput.type === 'password';
+        passwordInput.type = isHidden ? 'text' : 'password';
+
+        
+        // toggle icon classes
+        e.target.classList.toggle("fa-eye");
+        e.target.classList.toggle("fa-eye-slash");
+    }
+});
+
+function enableEdit(button) {
+    const row = button.closest("tr");
+    if (!row) return;
+
+    const inputs = row.querySelectorAll("input");
+    const isEditable = !inputs[0].hasAttribute("readonly"); //check current state
+
+    if (isEditable)
+    {
+        //already editable --> lock it
+        inputs.forEach(input => input.setAttribute("readonly", true));
+        button.innerHTML = `<i class="fa fa-pencil" aria-hidden="true"></i>`; // Edit mode
+        lastEditedRow = null;
+    }
+
+    else {
+        //was locked --> unlock it
+        //if another row was being edited, lock it
+       if (lastEditedRow && lastEditedRow !== row)
+       {
+        const prevInputs = lastEditedRow.querySelectorAll('input');
+        prevInputs.forEach(input => input.setAttribute('readonly', true));
+        const prevEditBtn = lastEditedRow.querySelector('button[onclick*="enableEdit"]');
+        if (prevEditBtn) prevEditBtn.button.innerHTML = `<i class="fa fa-pencil" aria-hidden="true"></i>`;
+       }
+       inputs.forEach(input => input.removeAttribute("readonly"));
+       button.innerHTML = `<i class="fa fa-lock" aria-hidden="true"></i>`; //toggle to indicate state
+       lastEditedRow = row;
+
+    }
+
+}
+
+
+
+ //event listener for delete function
+document.addEventListener("click", function (e) {
+    if (e.target && (e.target.classList.contains("del-btn") || e.target.closest(".del-btn"))) {
+        
+        const btn = e.target.closest(".del-btn");
+        const row = e.target.closest("tr");
+
+        const confirmed = confirm("Are you sure you want to delete this row?");
+        if (confirmed) {
+            deleteRow(btn); //call deleteRow function manually
+        }
+    }
+  });
+
+
+        
+        </script>
+            
+
+        
+        
+    </body>
+</html>

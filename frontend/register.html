@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>PassKeep</title>
+
+        <style>
+            body 
+            {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                margin: 50px; 
+                background-color: #a38db4;
+                color: black;
+            }
+
+             button
+            {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                margin: 10px;
+                background-color:#7c76b0;
+                color:white;
+                border-radius:100px;
+                width: 200px;
+                height: 50px;
+                font-size: 15px;
+                padding: 5px 5px;
+            }
+
+            input[type=text], input[type=password]
+            {
+                width: 100%;
+                padding: 12px 20px;
+                margin: 8px 0;
+                display: inline-block;
+                border: 1px solid #ccc;
+                box-sizing: border-box;
+
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            p.small {
+                line-height: 0.1;
+            }
+
+             p.medium {
+                line-height: 1.3;
+            }
+
+            .wrapper {
+                width: 420px;
+                background: transparent;
+                color: black;
+                display: flex;
+                justify-content: center;
+                margin: 0 auto;
+                border: 2px solid rgba(255,255, 255, .2);
+                border-radius: 10px;
+                padding: 30px 40px;
+                backdrop-filter: blur(20px);
+                box-shadow: 0 0 10px rgba(0, 0, 0, .2);
+
+            }
+
+            .wrapper h1 {
+                font-size: 36px; 
+                text-align: center;
+            }
+
+            .input-box input {
+                width: 100%;
+                height: 100%;
+                background: transparent;
+                border: none;
+                outline: none; 
+                border: 2px solid rgba(255,255, 255, .2);
+                border-radius: 40px;
+                color: white;
+            }
+
+            .small-note {
+                font-size: 0.8rem;
+                margin-top: 2px;
+                margin-bottom: 0px;
+                
+            }
+
+            label {
+                display: block;
+                margin-bottom: 2px; /* adjust to control spacing below "Password" */
+              }
+            
+        </style>
+        <body>
+            <h1>Registration</h1>
+           
+
+        <div class="wrapper">
+            <form id="register-form">
+                <div class="input-box">
+                    <p class="medium">
+                    <label for="uname"><b>Username</b></label>
+                    <input type="text" placeholder="Enter Username" name="username" required>
+                    </p>
+                </div>
+                
+                <div class="input-box">
+                     <label for="password1"><b>Password</b></label>
+                     <div class="small-note">(Enter eight or more characters)</div>
+                     <input type="text" placeholder="Enter Password" name="password1" pattern=".{8,}" title="Eight or more characters" required>
+                   </div>
+                   
+
+                <div class="input-box">
+                    <p class="medium">
+                    <label for="password2"><b>Repeat Password</b></label>
+                    <input type="text" placeholder="Repeat Password" name="password2"  pattern=".{8,}" title="Eight or more characters" required>
+                    </p>
+                </div>   
+                <hr>
+                <p>By creating an account you agree to our <a href="#">Terms & Privacy</a>.</p>
+                
+                <button type="submit">Register</button>
+
+                <p>
+                    Already have an account? <a href="file:///C:/cygwin64/home/passKeep/frontend/index.html"> Sign in</a>.
+                </p>
+          
+                
+            </div>
+        </form>
+
+        <script>
+
+    // Add the event listener to the login form once the DOM is loaded
+    // This tells the browser to use the handleLogin function when the form is submitted
+   document.getElementById("register-form").addEventListener("submit", async function (e) {
+    e.preventDefault(); // stop native form submission
+
+    const form = this;
+    const username = form.username.value.trim();
+    const password1 = form.password1.value;
+    const password2 = form.password2.value;
+
+    if (!username) {
+        alert("Please enter a username");
+        return;
+    }
+
+    if (!password1) {
+        alert("Please enter Password");
+        return;
+    }
+
+    if (!password2) {
+        alert("Please enter confirm password");
+        return;
+    }
+
+    if (password1 !== password2) {
+        alert("Password did not match: Please try again...");
+        return;
+    }
+
+    try {
+        const res = await fetch("http://localhost:3000/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username,
+                password: password1
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.message || "Registration failed");
+        } else {
+            alert("User registered successfully!");
+            window.location.href = "index.html";
+        }
+    } catch (err) {
+        console.error("Error during registration:", err);
+        alert("Something went wrong. Try again.");
+    }
+});
+
+</script>
+        </body>
+        
+    </head>
+</html>

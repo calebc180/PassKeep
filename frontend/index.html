@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>PassKeep</title>
+
+        <style>
+            body 
+            {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                margin: 50px; 
+                background-color: #a38db4;
+                color: black;
+            }
+
+            button
+            {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                margin: 10px;
+                background-color:#7c76b0;
+                color:white;
+                border-radius:100px;
+                width: 200px;
+                height: 50px;
+                font-size: 15px;
+                padding: 5px 5px;
+            }
+
+            input[type=text], input[type=password]
+            {
+                width: 100%;
+                padding: 12px 20px;
+                margin: 8px 0;
+                display: inline-block;
+                border: 1px solid #ccc;
+                box-sizing: border-box;
+
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            p.small {
+                line-height: 0.1;
+            }
+
+             p.medium {
+                line-height: 1.3;
+            }
+
+            .wrapper {
+                width: 420px;
+                background: transparent;
+                color: black;
+                display: flex;
+                justify-content: center;
+                margin: 0 auto;
+                border: 2px solid rgba(255,255, 255, .2);
+                border-radius: 10px;
+                padding: 30px 40px;
+                backdrop-filter: blur(20px);
+                box-shadow: 0 0 10px rgba(0, 0, 0, .2);
+
+            }
+
+            .wrapper h1 {
+                font-size: 36px;
+                text-align: center;
+            }
+
+            .wrapper .input-box {
+                width: 100%;
+                height: 50px;
+                background: transparent;
+                margin: 30px 0;
+            }
+
+            .input-box input {
+                width: 100%;
+                height: 100%;
+                background: transparent;
+                border: none;
+                outline: none; 
+                border: 2px solid rgba(255,255, 255, .2);
+                border-radius: 40px;
+                color: white;
+            }
+
+
+            
+/* <a href="file:///C:/cygwin64/home/passKeep/passHold.html" target="blank">
+                <button class="normal-button">Go to passwords</button>
+            </a>
+            */
+
+        </style>
+
+
+    </head>
+    <body>
+        <h1>PassKeep</h1>
+        <h3>We will keep your passwords protected!</h2>
+           
+
+        <div class="wrapper">
+            <form id="login-form">
+                <h2>Login</h2>
+                <div class="input-box">
+                    <p class="medium">
+                    <label for="uname"><b>Username</b></label>
+                    <input type="text" placeholder="Enter Username" name="uname" required>
+                    </p>
+                </div>
+                
+                <div class="input-box">
+                    <p class="medium">
+                    <label for="psw"><b>Password</b></label>
+                    <input type="text" placeholder="Enter Password" name="psw" required>
+                    </p>
+                </div>
+                <button type="submit">Login</button>
+                <p class="small">
+                <label> 
+                    <input type="checkbox" checked="checked" name="remember">
+                    Remember me
+                </label>
+                </p>
+
+                <p>
+                    Don't have an account? <a href="file:///C:/cygwin64/home/passKeep/frontend/register.html"> Register here</a>.
+                </p>
+                
+            </div>
+        </form>
+
+        <script>
+
+    // This function handles the login form submission
+    async function handleLogin(event)
+    {
+        event.preventDefault(); // Prevent the form from submitting the traditional way and reloading the page
+
+        // Get the values entered in the username and password fields
+        const username = document.querySelector('input[name="uname"]').value;
+        const password = document.querySelector('input[name="psw"]').value;
+
+        try 
+        {
+            // Send a POST request to the backend login route
+            const response = await fetch('http://localhost:3000/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }, // Tell the server we're sending JSON
+                body: JSON.stringify({ username, password })     // Convert the login data to JSON
+            });
+
+            // Parse the response from the server as JSON
+            const data = await response.json();
+
+            if (response.ok)
+            {
+                // If login was successful, show an alert and redirect the user to the password manager page
+                alert('Login successful!');
+
+                //store username for use in password page
+                localStorage.setItem('loggedInUsername', username);
+                window.location.href = "passHold.html"; // Change this if your main app is at a different path
+            }
+            else
+            {
+                // If the login failed, show the error message from the server or a default message
+                alert(data.message || 'Login failed');
+            }
+        }
+        catch (error) {
+            // If there's a network error or something unexpected, log it and show a general alert
+            console.error('Error during login:', error);
+            alert('Something went wrong');
+        }
+    }
+
+    // Add the event listener to the login form once the DOM is loaded
+    // This tells the browser to use the handleLogin function when the form is submitted
+    document.getElementById('login-form').addEventListener('submit', handleLogin);
+</script>
+
+    </body>
+</html>
