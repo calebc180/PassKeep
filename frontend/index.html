@@ -131,7 +131,7 @@
                 </p>
 
                 <p>
-                    Don't have an account? <a href="file:///C:/cygwin64/home/passKeep/frontend/register.html"> Register here</a>.
+                    Don't have an account? <a href="register.html"> Register here</a>.
                 </p>
                 
             </div>
@@ -140,47 +140,52 @@
         <script>
 
     // This function handles the login form submission
-    async function handleLogin(event)
+   async function handleLogin(event)
+{
+    event.preventDefault();
+
+    const username = document.querySelector('input[name="uname"]').value;
+    const password = document.querySelector('input[name="psw"]').value;
+
+    try 
     {
-        event.preventDefault(); // Prevent the form from submitting the traditional way and reloading the page
+        console.log("Sending login request:", { username, password });
 
-        // Get the values entered in the username and password fields
-        const username = document.querySelector('input[name="uname"]').value;
-        const password = document.querySelector('input[name="psw"]').value;
+        const response = await fetch('http://localhost:3000/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
 
-        try 
-        {
-            // Send a POST request to the backend login route
-            const response = await fetch('http://localhost:3000/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }, // Tell the server we're sending JSON
-                body: JSON.stringify({ username, password })     // Convert the login data to JSON
-            });
+        const contentType = response.headers.get("content-type");
 
-            // Parse the response from the server as JSON
-            const data = await response.json();
-
-            if (response.ok)
-            {
-                // If login was successful, show an alert and redirect the user to the password manager page
-                alert('Login successful!');
-
-                //store username for use in password page
-                localStorage.setItem('loggedInUsername', username);
-                window.location.href = "passHold.html"; // Change this if your main app is at a different path
-            }
-            else
-            {
-                // If the login failed, show the error message from the server or a default message
-                alert(data.message || 'Login failed');
-            }
+        let data;
+        if (contentType && contentType.includes("application/json")) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            console.error("Unexpected response format:", text);
+            alert("Server error (not JSON): " + text.slice(0, 100));
+            return;
         }
-        catch (error) {
-            // If there's a network error or something unexpected, log it and show a general alert
-            console.error('Error during login:', error);
-            alert('Something went wrong');
+
+        if (response.ok)
+        {
+            alert('Login successful!');
+            localStorage.setItem('loggedInUsername', username);
+            window.location.href = "passHold.html";
+        }
+        else
+        {
+            alert(data.message || 'Login failed');
         }
     }
+    catch (error) {
+        console.error('Error during login:', error);
+        alert('Something went wrong');
+    }
+}
+
 
     // Add the event listener to the login form once the DOM is loaded
     // This tells the browser to use the handleLogin function when the form is submitted

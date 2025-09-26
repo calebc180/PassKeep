@@ -128,7 +128,7 @@
                 <button type="submit">Register</button>
 
                 <p>
-                    Already have an account? <a href="file:///C:/cygwin64/home/passKeep/frontend/index.html"> Sign in</a>.
+                    Already have an account? <a href="index.html"> Sign in</a>.
                 </p>
           
                 
@@ -179,7 +179,7 @@
             })
         });
 
-        const data = await res.json();
+        const data = await res.json(); //assigns "data" to response body after conversion from JSON to a JS object
 
         if (!res.ok) {
             alert(data.message || "Registration failed");
