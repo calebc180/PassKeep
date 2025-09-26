@@ -15,3 +15,13 @@ A full-stack password manager web app with encryption, user authentication, and 
 - **Database**: MongoDB  
 - **Other**: LocalStorage, bcrypt (for encryption)
 
+## Screenshots
+
+### Login Page
+![Login Page](./screenshots/passkeepLogin.png)
+
+### Registration Page
+![Registration Page](./screenshots/passkeepRegistration.png)
+
+### Password Table
+![Password Table](./screenshots/passkeepTable.png)
