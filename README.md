@@ -47,31 +47,30 @@ A full-stack password manager web app with encryption, user authentication, and 
 
 
 4. Configure environment variables (create a .env file in /backend):
-   ```bash
-   MONGO_URI=your-mongodb-connection-string
-   PORT=5000
+    ```bash
+MONGO_URI=your-mongodb-connection-string
+PORT=5000
 
-## 📂 Project Structure
-```bash
-PassKeep/
-├── frontend/          # Client-side code (HTML/CSS/JS)
-│   ├── index.html
-│   ├── passHold.html
-│   └── register.html
-├── backend/           # Server-side code (Node.js + Express + MongoDB)
-│   ├── models/
-|           |── PasswordEntry.js
-            |── User.js
-│   ├── node_modules/
-│   ├── .env (ignored)
-│   ├── test.js
-│   |── server.js
-|   └── package-lock.json
-|   └── package.json
-|   └── .gitignore
-├── screenshots/       # Images used in the README
-├── README.md          # Project documentation
-
-
-## Author
+## Project Structure
+    ```bash
+    PassKeep/
+    ├── frontend/          # Client-side code (HTML/CSS/JS)
+    │   ├── index.html
+    │   ├── passHold.html
+    │   └── register.html
+    ├── backend/           # Server-side code (Node.js + Express + MongoDB)
+    │   ├── models/
+    │   │   ├── PasswordEntry.js
+    │   │   └── User.js
+    │   ├── node_modules/
+    │   ├── .env (ignored)
+    │   ├── test.js
+    │   ├── server.js
+    │   ├── package-lock.json
+    │   ├── package.json
+    │   └── .gitignore
+    ├── screenshots/       # Images used in the README
+    └── README.md          # Project documentation
+       
+`
 Caleb Conwell
