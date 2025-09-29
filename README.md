@@ -50,7 +50,6 @@ A full-stack password manager web app with encryption, user authentication, and 
     ```bash
    MONGO_URI=your-mongodb-connection-string
    PORT=5000
-   ```
 
 ## Project Structure
     ```bash
