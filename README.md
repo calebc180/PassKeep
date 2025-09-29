@@ -52,7 +52,7 @@ A full-stack password manager web app with encryption, user authentication, and 
    PORT=5000
 
 ## Project Structure
-    ```bash
+  
     PassKeep/
     ├── frontend/          # Client-side code (HTML/CSS/JS)
     │   ├── index.html
