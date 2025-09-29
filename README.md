@@ -32,3 +32,45 @@ A full-stack password manager web app with encryption, user authentication, and 
    ```bash
    git clone https://github.com/your-username/passkeep.git
    cd passkeep
+
+2. Setup  backend
+   ```bash
+   cd backend
+   npm install
+   npm start
+
+3. Setup  backend
+   ```bash
+   cd frontend
+   npm install
+   npm start
+
+
+4. Configure environment variables (create a .env file in /backend):
+   ```bash
+   MONGO_URI=your-mongodb-connection-string
+   PORT=5000
+
+## 📂 Project Structure
+PassKeep/
+├── frontend/          # Client-side code (HTML/CSS/JS)
+│   ├── index.html
+│   ├── passHold.html
+│   └── register.html
+├── backend/           # Server-side code (Node.js + Express + MongoDB)
+│   ├── models/
+|           |── PasswordEntry.js
+            |── User.js
+│   ├── node_modules/
+│   ├── .env (ignored)
+│   ├── test.js
+│   |── server.js
+|   └── package-lock.json
+|   └── package.json
+|   └── .gitignore
+├── screenshots/       # Images used in the README
+├── README.md          # Project documentation
+
+
+## Author
+Caleb Conwell
