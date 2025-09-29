@@ -48,8 +48,9 @@ A full-stack password manager web app with encryption, user authentication, and 
 
 4. Configure environment variables (create a .env file in /backend):
     ```bash
-MONGO_URI=your-mongodb-connection-string
-PORT=5000
+   MONGO_URI=your-mongodb-connection-string
+   PORT=5000
+   ```
 
 ## Project Structure
     ```bash
@@ -71,6 +72,8 @@ PORT=5000
     │   └── .gitignore
     ├── screenshots/       # Images used in the README
     └── README.md          # Project documentation
+    ```   
+
        
-`
+## Author
 Caleb Conwell
