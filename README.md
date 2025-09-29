@@ -69,7 +69,7 @@ A full-stack password manager web app with encryption, user authentication, and 
     │   ├── package-lock.json
     │   ├── package.json
     │   └── .gitignore
-    ├── screenshots/       # Images used in the README
+    ├── screenshots/       # Images used in README
     └── README.md          # Project documentation
     ```   
 
