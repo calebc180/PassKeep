@@ -25,3 +25,10 @@ A full-stack password manager web app with encryption, user authentication, and 
 
 ### Password Table
 ![Password Table](./screenshots/passkeepTable.png)
+
+
+## ⚙️ Getting Started
+1. Clone the repository  
+   ```bash
+   git clone https://github.com/your-username/passkeep.git
+   cd passkeep
